@@ -45,6 +45,8 @@ PROGRAM = {
     "total_credits_completed": 78,
 }
 
+MODE = {"plan_mode": False}
+
 REQUIREMENTS = [
     {
         "id": 1,
@@ -111,6 +113,10 @@ class PlanAction(BaseModel):
     req_id: int
     code: str
 
+class ModeState(BaseModel):
+    plan_mode: bool
+
+
 def _get_requirement_or_404(req_id: int) -> dict:
     for r in REQUIREMENTS:
         if r["id"] == req_id:
@@ -165,6 +171,15 @@ def get_progress():
         "percent_complete": round(100 * completed / total_required, 1),
         "percent_projected": round(100 * projected / total_required, 1),
     }
+
+@app.get("/mode")
+def get_mode():
+    return MODE
+
+@app.post("/mode")
+def set_mode(mode: ModeState):
+    MODE["plan_mode"] = mode.plan_mode
+    return MODE
 
 @app.post("/plan/add")
 def add_to_plan(action: PlanAction):

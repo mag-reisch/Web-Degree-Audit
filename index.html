@@ -2,15 +2,31 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Mock Degree Audit</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="header.css"> 
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to requirements</a> 
     <div id="error"></div>
-    <div id="header"></div>
-    <div id="progress"></div>
-    <br>
-    <div id="requirements"></div>
+    
+    <header class="app-header" id="app-header">
+      <div id="header"></div>
+      <div class="header-controls">
+        <div id="header-summary"></div>
+        <div id="mode-controls">
+          <label><input id="plan-mode" type="checkbox"> Plan Mode</label>
+        </div>
+      </div>
+    </header>
+    
+    <main id="main" class="content" tabindex="-1">
+      <div id="progress"></div>
+      <br>
+      <div id="requirements"></div>
+    </main>
+    <script src="header.js"></script> 
     <script src="script.js"></script>
   </body>
 </html>

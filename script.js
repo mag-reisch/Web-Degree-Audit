@@ -8,6 +8,21 @@ const STATUS_LABELS = {
 };
 
 const openCategories = new Set();
+let planMode = false;
+const modeToggle = document.getElementById("plan-mode");
+
+modeToggle.addEventListener("change", async () => {
+  modeToggle.disabled = true;
+  if (await apiPost("/mode", { plan_mode: modeToggle.checked })) {
+    planMode = modeToggle.checked;
+    document.body.classList.toggle("plan-mode", planMode);
+    await renderAudit();
+  } else {
+    modeToggle.checked = planMode;
+  }
+  modeToggle.disabled = false;
+  modeToggle.focus(); 
+});
 
 async function apiGet(path, fallback = {}) {
   try {
@@ -52,13 +67,17 @@ function el(tag, text) {
 
 async function addToPlan(reqId, code) {
   if (await apiPost("/plan/add", { req_id: reqId, code })) {
-    renderAudit();
+    await renderAudit();                      
+    window.focusPlanButton?.(code);           
+    window.announce?.(`${code} added to plan`);
   }
 }
 
 async function removeFromPlan(reqId, code) {
   if (await apiPost("/plan/remove", { req_id: reqId, code })) {
-    renderAudit();
+    await renderAudit();                      
+    window.focusPlanButton?.(code);           
+    window.announce?.(`${code} removed from plan`);
   }
 }
 
@@ -86,11 +105,14 @@ async function renderAudit() {
   bar1.value = percentComplete;
   progressBox.appendChild(bar1);
 
-  progressBox.appendChild(el("div", `Projected with plan: ${percentProjected}%`));
-  const bar2 = el("progress");
-  bar2.max = 100;
-  bar2.value = percentProjected;
-  progressBox.appendChild(bar2);
+  if (planMode) {
+    progressBox.appendChild(el("div", `Projected with plan: ${percentProjected}%`));
+    const bar2 = el("progress");
+    bar2.className = "projected";
+    bar2.max = 100;
+    bar2.value = percentProjected;
+    progressBox.appendChild(bar2);
+  }
 
   const container = document.getElementById("requirements");
   container.replaceChildren();
@@ -103,33 +125,68 @@ async function renderAudit() {
       else openCategories.delete(req.id);
     });
 
-    const plannedNote = req.credits_planned ? ` (+${req.credits_planned} planned)` : "";
+    const plannedNote = planMode && req.credits_planned ? ` (+${req.credits_planned} planned)` : "";
     details.appendChild(el("summary",
       `${req.name} (${req.credits_completed}/${req.credits_required} credits${plannedNote})`));
 
     renderCourses(details, req.id, req.courses);
     container.appendChild(details);
   }
+  window.afterRender?.(percentComplete, percentProjected);
 }
 
 function renderCourses(parent, reqId, courses) {
-  for (const c of courses) {
-    const row = el("div");
-    row.className = "row";
-    row.appendChild(el("span",
-      `${c.code} - ${c.title} (${c.credits} cr) - ${STATUS_LABELS[c.status] || c.status}`));
+  const wrapper = el("div");
+  wrapper.className = "courses-scroll";
+  const table = el("table");
+  table.className = "courses";
+  const head = el("thead");
+  const headings = el("tr");
+  const columns = ["Course", "Credits", "Status"];
+  if (planMode) columns.push("Plan");
+  for (const heading of columns) {
+    const cell = el("th", heading);
+    cell.scope = "col";
+    headings.appendChild(cell);
+  }
+  head.appendChild(headings);
+  table.appendChild(head);
+  const body = el("tbody");
 
-    if (c.status === "needed") {
+  for (const c of courses) {
+    const status = c.status === "planned" && !planMode ? "needed" : c.status;
+    const row = el("tr");
+    const course = el("td");
+    course.appendChild(el("strong", c.code));
+    course.appendChild(el("div", c.title));
+    row.appendChild(course);
+    row.appendChild(el("td", c.credits));
+    row.appendChild(el("td", STATUS_LABELS[status] || status));
+    const actions = el("td");
+
+    if (planMode && c.status === "needed") {
       const btn = el("button", "+ Add to Plan");
       btn.onclick = () => addToPlan(reqId, c.code);
-      row.appendChild(btn);
-    } else if (c.status === "planned") {
+      actions.appendChild(btn);
+    } else if (planMode && c.status === "planned") {
       const btn = el("button", "- Remove from Plan");
       btn.onclick = () => removeFromPlan(reqId, c.code);
-      row.appendChild(btn);
+      actions.appendChild(btn);
     }
-    parent.appendChild(row);
+    if (planMode) row.appendChild(actions);
+    body.appendChild(row);
   }
+  table.appendChild(body);
+  wrapper.appendChild(table);
+  parent.appendChild(wrapper);
 }
 
-renderAudit();
+async function initPage() {
+  const mode = await apiGet("/mode");
+  planMode = Boolean(mode.plan_mode);
+  modeToggle.checked = planMode;
+  document.body.classList.toggle("plan-mode", planMode);
+  await renderAudit();
+}
+
+initPage();
