@@ -113,3 +113,13 @@ progress.projected {
   vertical-align: middle;
   margin-right: 4px;
 }
+
+#course-search {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  padding: 10px;
+  font: inherit;
+  border: 2px solid #555;
+  margin: 4px 0 8px;
+}

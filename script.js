@@ -26,6 +26,8 @@ function showPlanModeStatus() {
 const openCategories = new Set();
 let planMode = false;
 const modeToggle = document.getElementById("plan-mode");
+const searchBox = document.getElementById("course-search");
+searchBox.addEventListener("input", filterCourses);
 
 modeToggle.addEventListener("change", async () => {
   modeToggle.disabled = true;
@@ -159,6 +161,7 @@ async function renderAudit() {
     container.appendChild(details);
   }
   window.afterRender?.(percentComplete, percentProjected);
+  filterCourses();
 }
 
 function renderCourses(parent, reqId, courses) {
@@ -211,6 +214,45 @@ function renderCourses(parent, reqId, courses) {
   table.appendChild(body);
   wrapper.appendChild(table);
   parent.appendChild(wrapper);
+}
+
+
+function filterCourses() {
+  const searchText = searchBox.value.trim().toLowerCase();
+  const rows = document.querySelectorAll("#requirements tbody tr");
+  let matchCount = 0;
+
+  for (const row of rows) {
+    const courseText = row.cells[0].textContent.toLowerCase();
+    if (courseText.includes(searchText)) {
+      row.hidden = false;
+      matchCount = matchCount + 1;
+    } else {
+      row.hidden = true;
+    }
+  }
+
+  const sections = document.querySelectorAll("#requirements details");
+  for (const section of sections) {
+    const visibleRows = section.querySelectorAll("tbody tr:not([hidden])");
+    if (searchText === "") {
+      section.hidden = false;
+    } else if (visibleRows.length > 0) {
+      section.hidden = false;
+      section.open = true;
+    } else {
+      section.hidden = true;
+    }
+  }
+
+  const resultsText = document.getElementById("search-results");
+  if (searchText === "") {
+    resultsText.textContent = "";
+  } else if (matchCount === 0) {
+    resultsText.textContent = "No courses match \"" + searchBox.value + "\"";
+  } else {
+    resultsText.textContent = matchCount + " courses found";
+  }
 }
 
 async function initPage() {
