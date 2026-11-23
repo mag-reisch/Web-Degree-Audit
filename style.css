@@ -51,6 +51,15 @@ summary {
   background: #f6f7f8;
 }
 
+.courses tbody tr.status-planned {
+  background: #fff1df;
+}
+
+.courses .status-planned td:nth-child(3) {
+  color: #8a3309;
+  font-weight: 600;
+}
+
 .courses td:first-child {
   width: 55%;
 }
