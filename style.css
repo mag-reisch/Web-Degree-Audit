@@ -9,6 +9,7 @@ h1 {
 }
 
 progress {
+  accent-color: #15803d;
   width: 50%;
   display: block;
   margin-bottom: 8px;
