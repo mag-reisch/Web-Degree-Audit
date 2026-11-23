@@ -16,18 +16,30 @@ const STATUS_ICONS = {
 
 function showPlanModeStatus() {
   const statusText = document.getElementById("plan-mode-status");
+  const hintText = document.getElementById("plan-mode-hint");
   if (planMode) {
     statusText.textContent = "On";
+    hintText.textContent = "Planning only. This does not register you for classes.";
   } else {
     statusText.textContent = "Off";
+    hintText.textContent = "Turn on to plan future courses.";
   }
 }
+
 
 const openCategories = new Set();
 let planMode = false;
 const modeToggle = document.getElementById("plan-mode");
 const searchBox = document.getElementById("course-search");
 searchBox.addEventListener("input", filterCourses);
+const clearSearchButton = document.getElementById("clear-search");
+clearSearchButton.addEventListener("click", clearSearch);
+
+function clearSearch() {
+  searchBox.value = "";
+  filterCourses();
+  searchBox.focus();
+}
 
 modeToggle.addEventListener("change", async () => {
   modeToggle.disabled = true;
@@ -118,14 +130,14 @@ async function renderAudit() {
 
   const progressBox = document.getElementById("progress");
   progressBox.replaceChildren();
-  progressBox.appendChild(el("div", `Completed: ${percentComplete}%`));
+  progressBox.appendChild(el("div", `Degree completed: ${percentComplete}%`));
   const bar1 = el("progress");
   bar1.max = 100;
   bar1.value = percentComplete;
   progressBox.appendChild(bar1);
 
   if (planMode) {
-    progressBox.appendChild(el("div", `Projected with plan: ${percentProjected}%`));
+    progressBox.appendChild(el("div", `If you take your planned courses: ${percentProjected}%`));
     const bar2 = el("progress");
     bar2.className = "projected";
     bar2.max = 100;
@@ -144,13 +156,12 @@ async function renderAudit() {
       else openCategories.delete(req.id);
     });
 
-    const plannedNote = planMode && req.credits_planned ? ` (+${req.credits_planned} planned)` : "";
+    const plannedNote = planMode && req.credits_planned ? `, ${req.credits_planned} planned` : "";
     details.appendChild(el("summary",
-      `${req.name} (${req.credits_completed}/${req.credits_required} credits${plannedNote})`));
-
+      `${req.name}: ${req.credits_completed} of ${req.credits_required} credits done${plannedNote}`));
     renderCourses(details, req.id, req.courses);
 
-    const closeButton = el('button', "Close");
+    const closeButton = el('button', "Close section");
     closeButton.className = "close-button";
     closeButton.addEventListener("click",()=> {
       openCategories.delete(req.id);
@@ -250,6 +261,8 @@ function filterCourses() {
     resultsText.textContent = "";
   } else if (matchCount === 0) {
     resultsText.textContent = "No courses match \"" + searchBox.value + "\"";
+  } else if (matchCount === 1) {
+    resultsText.textContent = "1 course found";
   } else {
     resultsText.textContent = matchCount + " courses found";
   }

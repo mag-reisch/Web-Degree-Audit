@@ -17,8 +17,9 @@
       <div class="header-controls">
         <div id="header-summary"></div>
         <div id="mode-controls">
-          <label><input id="plan-mode" type="checkbox"> Plan Mode: <span 
+          <label><input id="plan-mode" type="checkbox" aria-describedby="plan-mode-hint"> Plan Mode: <span
             id="plan-mode-status" aria-hidden="true">Off</span></label>
+            <p id="plan-mode-hint">Turn on to plan future courses.</p>
         </div>
       </div>
     </header>
@@ -27,7 +28,10 @@
       <div id="progress"></div>
       <br>
       <label for="course-search">Search courses</label>
-      <input id="course-search" type="search" placeholder="e.g. CS 410 or Algorithms">
+      <div class="search-row">
+        <input id="course-search" type="search" placeholder="e.g. CS 410 or Algorithms">
+        <button id="clear-search" type="button">Clear search</button>
+      </div>
       <p id="search-results" role="status"></p>
       <div id="requirements"></div>
     </main>
