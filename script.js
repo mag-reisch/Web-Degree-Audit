@@ -14,6 +14,15 @@ const STATUS_ICONS = {
   needed: "radio_button_unchecked",
 };
 
+function showPlanModeStatus() {
+  const statusText = document.getElementById("plan-mode-status");
+  if (planMode) {
+    statusText.textContent = "On";
+  } else {
+    statusText.textContent = "Off";
+  }
+}
+
 const openCategories = new Set();
 let planMode = false;
 const modeToggle = document.getElementById("plan-mode");
@@ -23,6 +32,7 @@ modeToggle.addEventListener("change", async () => {
   if (await apiPost("/mode", { plan_mode: modeToggle.checked })) {
     planMode = modeToggle.checked;
     document.body.classList.toggle("plan-mode", planMode);
+    showPlanModeStatus();
     await renderAudit();
   } else {
     modeToggle.checked = planMode;
@@ -208,6 +218,7 @@ async function initPage() {
   planMode = Boolean(mode.plan_mode);
   modeToggle.checked = planMode;
   document.body.classList.toggle("plan-mode", planMode);
+  showPlanModeStatus();
   await renderAudit();
 }
 
