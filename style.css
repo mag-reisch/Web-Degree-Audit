@@ -31,7 +31,7 @@ summary {
 
 .courses {
   width: 100%;
-  min-width: 520px;
+  /* min-width: 520px; */
   border-collapse: collapse;
   line-height: 1.5;
 }
