@@ -25,6 +25,19 @@ summary {
   cursor: pointer;
 }
 
+.requirement-summary {
+  display: inline-block;
+  vertical-align: top;
+  font-size: 1.125rem;
+  line-height: 1.4;
+}
+
+.requirement-credits {
+  display: block;
+  font-size: 0.9375rem;
+  color: #475569;
+}
+
 .courses-scroll {
   overflow-x: auto;
   margin-top: 12px;
@@ -55,7 +68,8 @@ summary {
   background: #fff1df;
 }
 
-.courses .status-planned td:nth-child(3) {
+.courses .status-planned td:nth-child(3),
+.requirement-planned {
   color: #8a3309;
   font-weight: 600;
 }

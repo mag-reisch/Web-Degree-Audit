@@ -156,9 +156,21 @@ async function renderAudit() {
       else openCategories.delete(req.id);
     });
 
-    const plannedNote = planMode && req.credits_planned ? `, ${req.credits_planned} planned` : "";
-    details.appendChild(el("summary",
-      `${req.name}: ${req.credits_completed} of ${req.credits_required} credits done${plannedNote}`));
+    const summary = el("summary");
+    const summaryText = el("span");
+    summaryText.className = "requirement-summary";
+    const title = el("strong", req.name);
+    const credits = el("span", `${req.credits_completed} of ${req.credits_required} credits done`);
+    credits.className = "requirement-credits";
+    if (planMode && req.credits_planned) {
+      const unit = req.credits_planned === 1 ? "credit" : "credits";
+      const planned = el("span", `${req.credits_planned} ${unit} planned`);
+      planned.className = "requirement-planned";
+      credits.append(" · ", planned);
+    }
+    summaryText.append(title, " ", credits);
+    summary.appendChild(summaryText);
+    details.appendChild(summary);
     renderCourses(details, req.id, req.courses);
 
     const closeButton = el('button', "Close section");
